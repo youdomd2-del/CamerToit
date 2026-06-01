@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1565C0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>CamerToit</title>
+<link rel="manifest" href="#"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1565C0;--blue2:#1976D2;--blue-l:#E3F2FD;
+  --orange:#FF6B00;--orange-l:#FFF3E0;
+  --green:#25D366;--red:#E53935;--yellow:#FFC107;
+  --bg:#F4F6FA;--white:#fff;--text:#1A1A2E;--muted:#6B7280;
+  --border:#E5E7EB;--sh:0 2px 12px rgba(0,0,0,0.08);--sh2:0 8px 24px rgba(0,0,0,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:#1A2332}
+/* PHONE SHELL */
+.phone{width:390px;height:844px;background:var(--bg);border-radius:50px;overflow:hidden;position:relative;box-shadow:0 0 0 8px #111,0 0 0 11px #2A3A4A,0 40px 80px rgba(0,0,0,0.7);margin:auto;display:block}
+body{display:flex;align-items:center;justify-content:center;min-height:100vh}
+/* STATUS BAR */
+.sb{height:44px;background:var(--white);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:absolute;top:0;left:0;right:0;z-index:100;flex-shrink:0}
+.sb-time{font-size:0.78rem;font-weight:800;color:var(--text)}
+.sb-icons{font-size:0.65rem;display:flex;gap:4px;align-items:center}
+/* SCREENS */
+.sc{position:absolute;inset:0;top:44px;bottom:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:none;flex-direction:column;background:var(--bg)}
+.sc::-webkit-scrollbar{display:none}
+.sc.on{display:flex}
+/* BOTTOM NAV */
+.bnav{position:absolute;bottom:0;left:0;right:0;height:76px;background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:14px;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,0.06)}
+.bni{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:0.58rem;font-weight:700;color:var(--muted);cursor:pointer;padding:4px 12px}
+.bni.on{color:var(--blue)}
+.bni-ico{font-size:1.2rem}
+.bnplus{width:46px;height:46px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;margin-top:-16px;box-shadow:0 4px 16px rgba(21,101,192,0.5);cursor:pointer;flex-shrink:0}
+/* COMMON */
+.hdr{background:var(--white);padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.hdr-title{font-size:0.95rem;font-weight:800;color:var(--text)}
+.bk{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text);padding:4px;flex-shrink:0}
+.btn-primary{background:var(--blue);color:white;border:none;border-radius:12px;padding:15px;width:100%;font-family:'Inter',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:all 0.2s}
+.btn-primary:active{opacity:0.85;transform:scale(0.98)}
+.btn-outline{background:transparent;color:var(--blue);border:2px solid var(--blue);border-radius:12px;padding:13px;width:100%;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer}
+.fl{font-size:0.75rem;font-weight:700;color:var(--text);margin-bottom:6px;display:block}
+.fi{width:100%;height:48px;border:1.5px solid var(--border);border-radius:10px;padding:0 14px;font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);outline:none;background:var(--white);margin-bottom:12px}
+.fi:focus{border-color:var(--blue)}
+.fsel{width:100%;height:48px;border:1.5px solid var(--border);border-radius:10px;padding:0 14px;font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);outline:none;background:var(--white);margin-bottom:12px;appearance:none}
+.scroll-content{flex:1;overflow-y:auto;scrollbar-width:none}
+.scroll-content::-webkit-scrollbar{display:none}
+/* TOAST */
+.toast{position:absolute;bottom:90px;left:20px;right:20px;background:#1A1A2E;color:white;border-radius:12px;padding:12px 16px;font-size:0.82rem;font-weight:600;text-align:center;z-index:200;transform:translateY(20px);opacity:0;transition:all 0.3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ═══ WELCOME ═══ */
+#sc-welcome{background:var(--white);justify-content:flex-end}
+.wc-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:linear-gradient(180deg,var(--blue-l) 0%,white 100%)}
+.wc-logo-box{width:80px;height:80px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin-bottom:14px;box-shadow:0 8px 24px rgba(21,101,192,0.3)}
+.wc-brand{font-size:2rem;font-weight:800;color:var(--blue)}
+.wc-brand span{color:var(--orange)}
+.wc-tag{font-size:0.82rem;color:var(--muted);margin-top:4px}
+.wc-illus{font-size:5rem;margin:20px 0}
+.wc-bottom{background:var(--white);border-radius:28px 28px 0 0;padding:28px 22px 32px;box-shadow:0 -4px 20px rgba(0,0,0,0.08)}
+.wc-bottom-title{font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:6px}
+.wc-bottom-desc{font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:18px}
+.phone-row{display:flex;gap:8px;margin-bottom:12px}
+.flag-box{height:48px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:0 12px;display:flex;align-items:center;font-size:0.82rem;font-weight:700;gap:4px;flex-shrink:0;color:var(--text)}
+.phone-fi{flex:1;height:48px;border:1.5px solid var(--border);border-radius:10px;padding:0 14px;font-family:'Inter',sans-serif;font-size:0.95rem;outline:none;background:var(--white)}
+.phone-fi:focus{border-color:var(--blue)}
+.terms{font-size:0.68rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5}
+.terms a{color:var(--blue)}
+
+/* ═══ OTP ═══ */
+#sc-otp{background:var(--white)}
+.otp-body{padding:24px 22px;flex:1}
+.otp-title{font-size:1.1rem;font-weight:800;color:var(--text);text-align:center;margin-bottom:8px}
+.otp-desc{font-size:0.82rem;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:24px}
+.otp-row{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
+.otp-box{width:62px;height:72px;border:2px solid var(--border);border-radius:14px;font-size:2rem;font-weight:800;color:var(--blue);text-align:center;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.otp-resend{font-size:0.75rem;color:var(--blue);text-align:center;margin-bottom:24px;font-weight:600;cursor:pointer}
+.role-title{font-size:0.88rem;font-weight:700;color:var(--text);text-align:center;margin-bottom:14px}
+.roles{display:flex;gap:12px;margin-bottom:24px}
+.role-card{flex:1;border:2px solid var(--border);border-radius:14px;padding:16px 10px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--white)}
+.role-card.on{border-color:var(--blue);background:var(--blue-l)}
+.role-ico{font-size:1.8rem;margin-bottom:6px}
+.role-lbl{font-size:0.82rem;font-weight:700;color:var(--text)}
+.role-sub{font-size:0.65rem;color:var(--muted);margin-top:3px;line-height:1.3}
+
+/* ═══ HOME ═══ */
+#sc-home .home-top{background:var(--white);padding:12px 18px 14px;flex-shrink:0}
+.ht-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.ht-greet{font-size:0.78rem;color:var(--muted)}
+.ht-name{font-size:1rem;font-weight:800;color:var(--text);margin-top:2px}
+.ht-bell{font-size:1.3rem;cursor:pointer;position:relative}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid white}
+.search-row2{display:flex;gap:8px;margin-bottom:12px}
+.sb2{flex:1;background:var(--bg);border-radius:10px;display:flex;align-items:center;gap:8px;padding:0 14px;height:44px;border:1.5px solid var(--border)}
+.sb2 input{flex:1;border:none;background:transparent;font-family:'Inter',sans-serif;font-size:0.85rem;color:var(--text);outline:none}
+.filter-ico-btn{width:44px;height:44px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;border:none;flex-shrink:0}
+.city-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.city-row::-webkit-scrollbar{display:none}
+.c-chip{padding:7px 16px;border-radius:100px;font-size:0.75rem;font-weight:700;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--muted);flex-shrink:0;transition:all 0.2s}
+.c-chip.on{background:var(--blue);color:white;border-color:var(--blue)}
+.c-chip-out{padding:7px 14px;border-radius:100px;font-size:0.75rem;font-weight:700;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--text);flex-shrink:0;display:flex;align-items:center;gap:4px}
+.home-feed{flex:1;overflow-y:auto;padding-bottom:82px;scrollbar-width:none}
+.home-feed::-webkit-scrollbar{display:none}
+.sec{padding:14px 18px 0}
+.sec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-size:0.92rem;font-weight:800;color:var(--text)}
+.sec-all{font-size:0.75rem;color:var(--blue);font-weight:700;cursor:pointer}
+/* Featured card */
+.fc{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:all 0.2s}
+.fc:active{transform:scale(0.98)}
+.fc-img{width:100%;height:180px;background:linear-gradient(135deg,#C8E6C9,#81C784);display:flex;align-items:center;justify-content:center;font-size:4.5rem;position:relative}
+.fc-badge{position:absolute;top:10px;left:10px;background:var(--orange);color:white;font-size:0.65rem;font-weight:800;padding:5px 12px;border-radius:100px}
+.fc-verified{position:absolute;top:10px;right:42px;background:var(--blue);color:white;font-size:0.62rem;font-weight:800;padding:4px 10px;border-radius:100px}
+.fc-fav{position:absolute;top:8px;right:8px;width:34px;height:34px;background:rgba(255,255,255,0.92);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;box-shadow:var(--sh)}
+.fc-body{padding:14px}
+.fc-price{font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:3px}
+.fc-price span{font-size:0.72rem;font-weight:500;color:var(--muted)}
+.fc-name{font-size:0.88rem;font-weight:600;color:var(--text);margin-bottom:4px}
+.fc-loc{font-size:0.72rem;color:var(--muted);display:flex;align-items:center;gap:4px}
+.fc-ams{display:flex;gap:12px;margin-top:8px}
+.fc-am{font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:3px}
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;overflow-x:auto;padding:12px 18px;scrollbar-width:none;flex-shrink:0}
+.filter-bar::-webkit-scrollbar{display:none}
+.f-chip{padding:7px 14px;border-radius:100px;font-size:0.72rem;font-weight:700;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--muted);flex-shrink:0;transition:all 0.2s}
+.f-chip.on{background:var(--blue);color:white;border-color:var(--blue)}
+/* List card */
+.lc{background:var(--white);border-radius:14px;overflow:hidden;box-shadow:var(--sh);margin:0 18px 10px;display:flex;cursor:pointer;transition:all 0.2s}
+.lc:active{transform:scale(0.98)}
+.lc-img{width:110px;flex-shrink:0;background:linear-gradient(135deg,#D4E8FF,#90CAF9);display:flex;align-items:center;justify-content:center;font-size:2.2rem;position:relative}
+.lc-vbadge{position:absolute;bottom:6px;left:6px;background:var(--blue);color:white;font-size:0.52rem;font-weight:800;padding:2px 6px;border-radius:100px}
+.lc-body{padding:12px;flex:1}
+.lc-price{font-size:0.92rem;font-weight:800;color:var(--text)}
+.lc-price span{font-size:0.65rem;color:var(--muted);font-weight:500}
+.lc-name{font-size:0.78rem;font-weight:600;color:var(--text);margin:3px 0}
+.lc-loc{font-size:0.68rem;color:var(--muted);margin-bottom:6px}
+.lc-row{display:flex;justify-content:space-between;align-items:center}
+.lc-tags{display:flex;gap:4px;flex-wrap:wrap}
+.lc-tag{padding:3px 8px;border-radius:100px;background:var(--bg);font-size:0.62rem;font-weight:700;color:var(--muted)}
+
+/* ═══ SEARCH SCREEN ═══ */
+#sc-search{background:var(--bg)}
+.search-full{padding:14px 18px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.sf-row{display:flex;gap:8px;align-items:center}
+.sf-input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;height:44px;padding:0 14px;font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);outline:none}
+.sf-input:focus{border-color:var(--blue)}
+/* Filters panel */
+.filters-panel{padding:14px 18px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.fp-title{font-size:0.82rem;font-weight:800;color:var(--text);margin-bottom:10px}
+.fp-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.fp-chip{padding:7px 14px;border-radius:100px;font-size:0.72rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--muted);white-space:nowrap;transition:all 0.2s}
+.fp-chip.on{background:var(--blue);color:white;border-color:var(--blue)}
+.range-row{display:flex;gap:10px;margin-bottom:8px}
+.range-inp{flex:1;height:40px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--text);outline:none;background:var(--white)}
+.range-inp:focus{border-color:var(--blue)}
+.btn-search-go{background:var(--blue);color:white;border:none;border-radius:10px;padding:11px;width:100%;font-family:'Inter',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer}
+
+/* ═══ DETAIL ═══ */
+#sc-detail{background:var(--white)}
+.d-img{width:100%;height:250px;background:linear-gradient(135deg,#C8E6C9,#66BB6A);display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;flex-shrink:0}
+.d-back{position:absolute;top:12px;left:14px;width:38px;height:38px;background:rgba(255,255,255,0.92);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh);border:none;font-size:1rem}
+.d-share{position:absolute;top:12px;right:52px;width:38px;height:38px;background:rgba(255,255,255,0.92);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh);border:none;font-size:1rem}
+.d-fav{position:absolute;top:12px;right:10px;width:38px;height:38px;background:rgba(255,255,255,0.92);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh);border:none;font-size:1.1rem}
+.d-thumbs{display:flex;gap:6px;padding:10px 16px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;align-items:center}
+.d-th{width:54px;height:42px;border-radius:8px;background:linear-gradient(135deg,#C8E6C9,#A5D6A7);display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:2px solid transparent;cursor:pointer}
+.d-th.on{border-color:var(--blue)}
+.d-cnt{margin-left:auto;font-size:0.68rem;color:var(--muted);font-weight:600}
+.d-body{flex:1;overflow-y:auto;padding:16px 18px 96px;scrollbar-width:none}
+.d-body::-webkit-scrollbar{display:none}
+.d-badges{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.d-bdg{padding:5px 12px;border-radius:100px;font-size:0.68rem;font-weight:800}
+.d-bdg-blue{background:var(--blue-l);color:var(--blue)}
+.d-bdg-orange{background:var(--orange-l);color:var(--orange)}
+.d-bdg-gray{background:var(--bg);color:var(--muted)}
+.d-price{font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:3px}
+.d-price span{font-size:0.75rem;color:var(--muted);font-weight:500}
+.d-name{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:5px}
+.d-loc{font-size:0.78rem;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:14px}
+.d-ams{display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.d-am{display:flex;flex-direction:column;align-items:center;gap:4px}
+.d-am-ico{width:44px;height:44px;border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:var(--bg)}
+.d-am-lbl{font-size:0.62rem;color:var(--muted);font-weight:600;text-align:center;line-height:1.3}
+.d-sec{font-size:0.88rem;font-weight:800;color:var(--text);margin:14px 0 8px}
+.d-desc{font-size:0.8rem;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.d-rows{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:14px}
+.d-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+.d-row:last-child{border:none}
+.d-row-l{color:var(--muted)}
+.d-row-v{font-weight:700;color:var(--text)}
+.d-row-v.green{color:var(--blue)}
+/* Budget calculator */
+.budget-calc{background:var(--blue-l);border:1.5px solid var(--blue);border-radius:14px;padding:14px;margin-bottom:14px}
+.bc-title{font-size:0.82rem;font-weight:800;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.bc-rows{display:flex;flex-direction:column;gap:6px}
+.bc-row{display:flex;justify-content:space-between;font-size:0.78rem}
+.bc-row-l{color:var(--muted)}
+.bc-row-v{font-weight:700;color:var(--text)}
+.bc-total{display:flex;justify-content:space-between;font-size:0.9rem;font-weight:800;padding-top:8px;border-top:1px solid rgba(21,101,192,0.2);margin-top:4px}
+.bc-total-v{color:var(--blue)}
+/* Host card */
+.host-card{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:12px;padding:12px;margin-bottom:14px}
+.host-av{width:50px;height:50px;border-radius:50%;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid var(--blue);flex-shrink:0}
+.host-name{font-size:0.88rem;font-weight:700;color:var(--text)}
+.host-type{font-size:0.68rem;color:var(--blue);font-weight:700;margin-bottom:2px}
+.host-rating{font-size:0.7rem;color:var(--muted)}
+.host-link{margin-left:auto;font-size:0.72rem;color:var(--blue);font-weight:700;cursor:pointer;white-space:nowrap}
+.d-cta{position:absolute;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:12px 18px 24px;display:flex;gap:10px}
+.btn-call{flex:1;height:52px;background:var(--blue);border:none;border-radius:12px;color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-wa{flex:1;height:52px;background:#25D366;border:none;border-radius:12px;color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-signal{width:52px;height:52px;background:#FFF3E0;border:none;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer}
+
+/* ═══ PUBLISH ═══ */
+#sc-publish{background:var(--bg)}
+.pub-bar{display:flex;gap:6px;padding:12px 18px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+.pb{flex:1;height:4px;border-radius:100px;background:var(--border);transition:all 0.3s}
+.pb.done{background:var(--blue)}
+.pb.cur{background:var(--orange)}
+.pub-body{flex:1;overflow-y:auto;padding:18px 18px 90px;scrollbar-width:none}
+.pub-body::-webkit-scrollbar{display:none}
+.pub-si{font-size:0.72rem;font-weight:700;color:var(--blue);margin-bottom:4px}
+.pub-st{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:18px}
+.pub-step{display:none}
+.pub-step.on{display:block}
+.radio-row{display:flex;gap:10px;margin-bottom:12px}
+.ro{display:flex;align-items:center;gap:8px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;color:var(--muted);flex:1;transition:all 0.2s}
+.ro.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.rd{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.comm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.cb2{display:flex;align-items:center;gap:8px;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--muted);background:var(--white);transition:all 0.2s}
+.cb2.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.cc{width:18px;height:18px;border-radius:4px;border:2px solid currentColor;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.6rem}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.pth{aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#C8E6C9,#A5D6A7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;position:relative}
+.pdel{position:absolute;top:-5px;right:-5px;width:18px;height:18px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:white}
+.padd{aspect-ratio:1;border-radius:10px;border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:var(--white)}
+.padd-ico{font-size:1.3rem;color:var(--muted)}
+.padd-lbl{font-size:0.6rem;color:var(--muted)}
+.boost-box{background:#FFF3E0;border:1.5px solid var(--orange);border-radius:14px;padding:14px;margin-bottom:16px}
+.bb-title{font-size:0.85rem;font-weight:800;color:var(--orange);margin-bottom:4px}
+.bb-desc{font-size:0.75rem;color:#8B4500;margin-bottom:10px;line-height:1.4}
+.bb-opts{display:flex;gap:8px}
+.bb-o{flex:1;padding:10px 6px;border-radius:10px;border:1.5px solid var(--orange);text-align:center;cursor:pointer;background:white;transition:all 0.2s}
+.bb-o.on{background:var(--orange);color:white}
+.bb-o-price{font-size:0.85rem;font-weight:800}
+.bb-o-lbl{font-size:0.6rem;color:var(--muted);margin-top:2px}
+.bb-o.on .bb-o-lbl{color:rgba(255,255,255,0.8)}
+.recap-box{background:var(--white);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
+.rb-title{font-size:0.88rem;font-weight:800;color:var(--text);margin-bottom:12px}
+.rb-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.8rem}
+.rb-row:last-child{border:none}
+.rb-l{color:var(--muted)}
+.rb-v{font-weight:700;color:var(--text)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:14px;padding:14px;margin-bottom:16px;box-shadow:var(--sh)}
+.tw{width:44px;height:24px;background:var(--blue);border-radius:100px;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s}
+.tw-k{width:20px;height:20px;background:white;border-radius:50%;position:absolute;top:2px;right:2px;box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:right 0.2s}
+.tw.off{background:var(--border)}
+.tw.off .tw-k{right:22px}
+
+/* ═══ FAVORIS ═══ */
+#sc-favs{background:var(--bg)}
+
+/* ═══ WALLET ═══ */
+#sc-wallet{background:var(--bg)}
+.wallet-banner{background:linear-gradient(135deg,var(--blue),#0D47A1);margin:16px;border-radius:18px;padding:20px;color:white;position:relative;overflow:hidden}
+.wb-deco{position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06)}
+.wb-deco2{position:absolute;bottom:-20px;left:30px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.04)}
+.wb-label{font-size:0.75rem;opacity:0.7;margin-bottom:4px}
+.wb-amount{font-size:2rem;font-weight:800;margin-bottom:3px}
+.wb-sub{font-size:0.7rem;opacity:0.6}
+.wb-actions{display:flex;gap:10px;margin-top:16px}
+.wb-btn{flex:1;height:40px;border-radius:10px;border:none;font-family:'Inter',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+.wb-btn-white{background:white;color:var(--blue)}
+.wb-btn-outline{background:rgba(255,255,255,0.15);color:white;border:1.5px solid rgba(255,255,255,0.3)}
+.wallet-menu{margin:0 16px;background:var(--white);border-radius:16px;box-shadow:var(--sh);padding:0 16px}
+.wm-section{font-size:0.78rem;font-weight:800;color:var(--muted);padding:12px 0 6px;text-transform:uppercase;letter-spacing:1px}
+.wm-item{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.wm-item:last-child{border:none}
+.wm-l{display:flex;align-items:center;gap:10px}
+.wm-ico{width:38px;height:38px;border-radius:10px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0}
+.wm-lbl{font-size:0.84rem;font-weight:600;color:var(--text)}
+.wm-sub{font-size:0.65rem;color:var(--muted);margin-top:1px}
+.wm-r{display:flex;align-items:center;gap:6px}
+.wm-val{font-size:0.75rem;color:var(--blue);font-weight:700}
+.wm-arr{font-size:0.75rem;color:var(--muted)}
+
+/* ═══ RECHARGE ═══ */
+#sc-recharge{background:var(--bg)}
+.rc-body{padding:16px 18px 90px}
+.rc-st{font-size:0.84rem;font-weight:800;color:var(--text);margin-bottom:10px}
+.rc-amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.rc-a{padding:12px 4px;border:1.5px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;background:var(--white);transition:all 0.2s}
+.rc-a.on{border-color:var(--blue);background:var(--blue-l)}
+.rc-a-val{font-size:0.82rem;font-weight:800;color:var(--text);display:block}
+.rc-a-sub{font-size:0.58rem;color:var(--muted);display:block;margin-top:2px}
+.po{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;background:var(--white);margin-bottom:8px;transition:all 0.2s}
+.po.on{border-color:var(--blue);background:var(--blue-l)}
+.po-ico{width:38px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;flex-shrink:0}
+.po-ico.mtn{background:#FFCC00;color:#333}
+.po-ico.om{background:#FF6600;color:white}
+.po-lbl{font-size:0.85rem;font-weight:700;color:var(--text);flex:1}
+.po-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.po.on .po-radio{border-color:var(--blue);background:var(--blue)}
+.po.on .po-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:white;display:block}
+
+/* ═══ STATS ═══ */
+#sc-stats{background:var(--bg)}
+.stats-body{padding:14px 18px 90px}
+.stats-period{display:flex;justify-content:flex-end;margin-bottom:14px}
+.stats-sel{font-size:0.75rem;font-weight:700;color:var(--blue);background:var(--blue-l);border:none;border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;cursor:pointer}
+.sn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.sn{background:var(--white);border-radius:14px;padding:14px;text-align:center;box-shadow:var(--sh)}
+.sn-val{font-size:1.5rem;font-weight:800;margin-bottom:3px}
+.sn-lbl{font-size:0.62rem;font-weight:700;color:var(--muted)}
+.s2grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.sm{background:var(--white);border-radius:14px;padding:12px;box-shadow:var(--sh)}
+.sm-t{font-size:0.7rem;color:var(--muted);font-weight:600;margin-bottom:5px}
+.sm-v{font-size:1rem;font-weight:800;color:var(--text)}
+.sm-s{font-size:0.65rem;margin-top:3px;font-weight:600}
+.chart-box{background:var(--white);border-radius:14px;padding:14px;box-shadow:var(--sh);margin-bottom:14px}
+.chart-box-t{font-size:0.84rem;font-weight:800;color:var(--text);margin-bottom:12px}
+.chart-wrap{display:flex;align-items:flex-end;gap:5px;height:90px}
+.cbar{flex:1;border-radius:4px 4px 0 0;background:var(--blue-l);transition:height 0.5s cubic-bezier(0.4,0,0.2,1)}
+.cbar.hi{background:var(--blue)}
+.chart-xl{display:flex;gap:5px;margin-top:6px}
+.cx{flex:1;font-size:0.5rem;color:var(--muted);text-align:center}
+.top-annonces{background:var(--white);border-radius:14px;padding:14px;box-shadow:var(--sh)}
+.ta-title{font-size:0.84rem;font-weight:800;color:var(--text);margin-bottom:12px}
+.ta-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ta-item:last-child{border:none}
+.ta-rank{width:24px;height:24px;border-radius:50%;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:var(--blue);flex-shrink:0}
+.ta-name{flex:1;font-size:0.78rem;font-weight:600;color:var(--text)}
+.ta-views{font-size:0.72rem;font-weight:700;color:var(--blue)}
+
+/* ═══ PROFILE ═══ */
+#sc-profile{background:var(--bg)}
+.profile-body{padding:14px 18px 90px}
+.prof-top{background:var(--white);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh)}
+.prof-av{width:64px;height:64px;border-radius:50%;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:1.9rem;border:3px solid var(--blue);flex-shrink:0}
+.prof-name{font-size:1rem;font-weight:800;color:var(--text)}
+.prof-phone{font-size:0.75rem;color:var(--muted);margin:3px 0}
+.prof-badge{display:inline-flex;align-items:center;gap:4px;background:var(--blue-l);color:var(--blue);font-size:0.68rem;font-weight:800;padding:4px 10px;border-radius:100px}
+.prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.ps-card{background:var(--white);border-radius:12px;padding:12px;text-align:center;box-shadow:var(--sh)}
+.ps-val{font-size:1.1rem;font-weight:800;color:var(--blue);margin-bottom:2px}
+.ps-lbl{font-size:0.6rem;font-weight:700;color:var(--muted)}
+.prof-menu{background:var(--white);border-radius:16px;padding:0 16px;box-shadow:var(--sh)}
+.pm-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.pm-item:last-child{border:none}
+.pm-l{display:flex;align-items:center;gap:10px;font-size:0.85rem;font-weight:600;color:var(--text)}
+.pm-ico{font-size:1rem}
+.pm-r{display:flex;align-items:center;gap:6px}
+.pm-val{font-size:0.72rem;color:var(--blue);font-weight:700}
+.pm-arr{font-size:0.75rem;color:var(--muted)}
+.pm-danger .pm-l{color:var(--red)}
+/* Lang toggle */
+.lang-row{display:flex;gap:8px;margin-bottom:12px}
+.lang-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;transition:all 0.2s}
+.lang-btn.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+/* Dark mode toggle */
+.dark-row{display:flex;align-items:center;justify-content:space-between;background:var(--white);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--sh)}
+.dr-l{font-size:0.84rem;font-weight:700;color:var(--text)}
+.dr-sub{font-size:0.68rem;color:var(--muted);margin-top:2px}
+
+/* ═══ MAP ═══ */
+#sc-map{background:var(--bg)}
+.map-area{flex:1;background:linear-gradient(135deg,#C8E6C9 0%,#A5D6A7 30%,#81C784 60%,#66BB6A 100%);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.map-grid{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.1) 0,rgba(255,255,255,0.1) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,rgba(255,255,255,0.1) 0,rgba(255,255,255,0.1) 1px,transparent 1px,transparent 40px)}
+.map-road-h{position:absolute;left:0;right:0;height:8px;background:rgba(255,255,255,0.4)}
+.map-road-v{position:absolute;top:0;bottom:0;width:8px;background:rgba(255,255,255,0.4)}
+.map-pin{position:absolute;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:all 0.2s}
+.map-pin:hover{transform:scale(1.1)}
+.map-pin-bubble{background:var(--white);border-radius:10px;padding:5px 10px;font-size:0.72rem;font-weight:800;color:var(--text);box-shadow:0 4px 12px rgba(0,0,0,0.2);white-space:nowrap;border:2px solid var(--blue)}
+.map-pin-bubble.orange{border-color:var(--orange)}
+.map-pin-tail{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--blue);margin-top:-1px}
+.map-pin-tail.orange{border-top-color:var(--orange)}
+.map-center-dot{width:14px;height:14px;background:var(--blue);border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(21,101,192,0.4)}50%{box-shadow:0 0 0 8px rgba(21,101,192,0)}}
+.map-controls{position:absolute;bottom:100px;right:14px;display:flex;flex-direction:column;gap:8px}
+.map-ctrl-btn{width:38px;height:38px;background:white;border-radius:10px;box-shadow:var(--sh2);display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;border:none}
+.map-card-preview{position:absolute;bottom:90px;left:14px;right:14px;background:var(--white);border-radius:14px;padding:12px;box-shadow:var(--sh2);display:flex;gap:10px;align-items:center}
+.map-card-img{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#C8E6C9,#81C784);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.map-card-info{}
+.map-card-price{font-size:0.9rem;font-weight:800;color:var(--text)}
+.map-card-name{font-size:0.75rem;color:var(--muted);margin-top:2px}
+.map-card-btn{margin-left:auto;background:var(--blue);color:white;border:none;border-radius:8px;padding:8px 12px;font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;white-space:nowrap}
+
+/* ═══ DARK MODE ═══ */
+.dark{--bg:#1A1A2E;--white:#242438;--text:#F0EDE6;--muted:#6B7280;--border:#2A2A3E;--sh:0 2px 12px rgba(0,0,0,0.3)}
+.dark .sb,.dark .hdr,.dark .home-top,.dark .search-full,.dark .filters-panel,.dark .d-thumbs,.dark .bnav,.dark .pub-bar,.dark .d-cta,.dark .det-cta{background:#1E1E32;border-color:#2A2A3E}
+.dark .fc,.dark .lc,.dark .map-card-preview,.dark .wallet-banner+.wallet-menu,.dark .recap-box,.dark .toggle-row,.dark .rc-a,.dark .po,.dark .sn,.dark .sm,.dark .chart-box,.dark .top-annonces,.dark .prof-top,.dark .ps-card,.dark .prof-menu,.dark .dark-row{background:#242438;border-color:#2A2A3E}
+.dark .wc-bottom{background:#1E1E32}
+.dark .otp-box,.dark .role-card,.dark .fi,.dark .fsel,.dark .sb2,.dark .f-chip,.dark .fp-chip,.dark .c-chip,.dark .cb2,.dark .ro,.dark .bb-o,.dark .padd,.dark .rc-a,.dark .po,.dark .lang-btn{background:#2A2A3E;border-color:#3A3A5E;color:var(--text)}
+
+/* NOTIF BADGE */
+.notif-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:white;font-weight:800;border:2px solid white}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <div class="sb">
+    <span class="sb-time" id="clock">9:41</span>
+    <span class="sb-icons">📶 🔋</span>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <!-- ═══ WELCOME ═══ -->
+  <div class="sc on" id="sc-welcome">
+    <div class="wc-hero">
+      <div class="wc-logo-box">🏠</div>
+      <div class="wc-brand">Camer<span>Toit</span></div>
+      <div class="wc-tag">Trouvez direct. Louez en confiance.</div>
+      <div class="wc-illus">🏢</div>
+    </div>
+    <div class="wc-bottom">
+      <div class="wc-bottom-title">Bienvenue sur CamerToit</div>
+      <div class="wc-bottom-desc">La plateforme simple et sécurisée pour trouver ou publier un logement sans arnaques.</div>
+      <div class="phone-row">
+        <div class="flag-box">🇨🇲 +237</div>
+        <input class="phone-fi" placeholder="6 12 34 56 78" type="tel" id="phone-inp">
+      </div>
+      <button class="btn-primary" onclick="go('sc-otp')">Recevoir le code OTP</button>
+      <div class="terms">En continuant, vous acceptez nos <a href="#">Conditions d'utilisation</a></div>
+    </div>
+  </div>
+
+  <!-- ═══ OTP ═══ -->
+  <div class="sc" id="sc-otp" style="background:var(--white)">
+    <div class="hdr"><button class="bk" onclick="go('sc-welcome')">←</button><div class="hdr-title">Vérification OTP</div></div>
+    <div class="otp-body">
+      <div class="otp-title">Entrez votre code</div>
+      <div class="otp-desc">Nous avons envoyé un code à<br/><strong>+237 6 12 34 56 78</strong><br/>Entrez le code reçu par SMS</div>
+      <div class="otp-row">
+        <div class="otp-box">2</div><div class="otp-box">8</div><div class="otp-box">4</div><div class="otp-box">6</div>
+      </div>
+      <div class="otp-resend">Renvoyer le code (00:45)</div>
+      <div class="role-title">Je suis</div>
+      <div class="roles">
+        <div class="role-card" id="r-loc" onclick="chooseRole('loc')">
+          <div class="role-ico">🔍</div><div class="role-lbl">Locataire</div><div class="role-sub">Je cherche un logement</div>
+        </div>
+        <div class="role-card on" id="r-bail" onclick="chooseRole('bail')">
+          <div class="role-ico">🏠</div><div class="role-lbl">Bailleur / Démarcheur</div><div class="role-sub">Je loue ou propose des logements</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="go('sc-home')">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ═══ HOME ═══ -->
+  <div class="sc" id="sc-home">
+    <div class="home-top">
+      <div class="ht-row">
+        <div><div class="ht-greet">Bonjour 👋</div><div class="ht-name">Trouvons votre chez-vous</div></div>
+        <div class="ht-bell" onclick="showToast('🔔 2 nouvelles annonces dans votre zone !')">🔔<div class="notif-dot"></div></div>
+      </div>
+      <div class="search-row2">
+        <div class="sb2"><span>🔍</span><input placeholder="Quartier, ville, budget..." onclick="go('sc-search')"></div>
+        <button class="filter-ico-btn" onclick="go('sc-search')">⚙️</button>
+      </div>
+      <div class="city-row">
+        <div class="c-chip on" onclick="activeChip(this)">Douala</div>
+        <div class="c-chip" onclick="activeChip(this)">Yaoundé</div>
+        <div class="c-chip" onclick="activeChip(this)">Bafoussam</div>
+        <div class="c-chip" onclick="activeChip(this)">Bamenda</div>
+        <div class="c-chip-out" onclick="go('sc-search')">Budget ▾</div>
+        <div class="c-chip-out" onclick="go('sc-search')">Filtres ⚙️</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="f-chip on" onclick="activeChip(this)">Tous</div>
+      <div class="f-chip" onclick="activeChip(this)">Studios</div>
+      <div class="f-chip" onclick="activeChip(this)">Appartements</div>
+      <div class="f-chip" onclick="activeChip(this)">Chambres</div>
+      <div class="f-chip" onclick="activeChip(this)">Villas</div>
+      <div class="f-chip" onclick="activeChip(this)">< 50k</div>
+      <div class="f-chip" onclick="activeChip(this)">50-100k</div>
+    </div>
+    <div class="home-feed">
+      <div class="sec">
+        <div class="sec-row"><div class="sec-title">⭐ À la une</div><div class="sec-all">Voir tout →</div></div>
+        <div class="fc" onclick="go('sc-detail')">
+          <div class="fc-img">🛋️
+            <div class="fc-badge">À LA UNE</div>
+            <div class="fc-verified">✅ Vérifié</div>
+            <div class="fc-fav">🤍</div>
+          </div>
+          <div class="fc-body">
+            <div class="fc-price">85 000 <span>FCFA / mois</span></div>
+            <div class="fc-name">Studio moderne à Bonapriso</div>
+            <div class="fc-loc">📍 Bonapriso, Douala</div>
+            <div class="fc-ams">
+              <div class="fc-am">🛏 1 chambre</div>
+              <div class="fc-am">🚿 1 douche</div>
+              <div class="fc-am">💧 Forage</div>
+              <div class="fc-am">🅿️ Parking</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sec" style="margin-top:14px">
+        <div class="sec-row"><div class="sec-title">🏘️ Toutes les annonces</div><div class="sec-all" onclick="go('sc-map')">🗺️ Carte</div></div>
+      </div>
+      <div class="lc" onclick="go('sc-detail')">
+        <div class="lc-img" style="background:linear-gradient(135deg,#D4E8FF,#90CAF9)">🏢<div class="lc-vbadge">✅ Vérifié</div></div>
+        <div class="lc-body">
+          <div class="lc-price">60 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Appartement F2 neuf</div>
+          <div class="lc-loc">📍 Makepe, Douala</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">💧 Forage</span><span class="lc-tag">⚡ Eneo</span></div><span>❤️</span></div>
+        </div>
+      </div>
+      <div class="lc" onclick="go('sc-detail')">
+        <div class="lc-img" style="background:linear-gradient(135deg,#FFE8D4,#FFAB76)">🏠</div>
+        <div class="lc-body">
+          <div class="lc-price">35 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Studio meublé Omnisport</div>
+          <div class="lc-loc">📍 Omnisport, Yaoundé</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">❄️ Clim</span><span class="lc-tag">📡 WiFi</span></div><span>🤍</span></div>
+        </div>
+      </div>
+      <div class="lc" onclick="go('sc-detail')">
+        <div class="lc-img" style="background:linear-gradient(135deg,#E8D4FF,#CE93D8)">🏡</div>
+        <div class="lc-body">
+          <div class="lc-price">120 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Villa 4 pièces Bastos</div>
+          <div class="lc-loc">📍 Bastos, Yaoundé</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">🅿️ Park</span><span class="lc-tag">🌿 Jardin</span></div><span>🤍</span></div>
+        </div>
+      </div>
+      <div class="lc" onclick="go('sc-detail')">
+        <div class="lc-img" style="background:linear-gradient(135deg,#D4F5FF,#80DEEA)">🏢</div>
+        <div class="lc-body">
+          <div class="lc-price">28 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Chambre propre Ndokotti</div>
+          <div class="lc-loc">📍 Ndokotti, Douala</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">💧 Forage</span><span class="lc-tag">🔒 Gardien</span></div><span>🤍</span></div>
+        </div>
+      </div>
+      <div class="lc" onclick="go('sc-detail')">
+        <div class="lc-img" style="background:linear-gradient(135deg,#FFF9C4,#FFF176)">🏠</div>
+        <div class="lc-body">
+          <div class="lc-price">45 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Studio meublé Bonamoussadi</div>
+          <div class="lc-loc">📍 Bonamoussadi, Douala</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">⚡ Eneo</span><span class="lc-tag">🚿 Douche</span></div><span>❤️</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni on" onclick="go('sc-home')"><div class="bni-ico">🏠</div>Accueil</div>
+      <div class="bni" onclick="go('sc-map')"><div class="bni-ico">🗺️</div>Carte</div>
+      <div class="bnplus" onclick="go('sc-publish')">+</div>
+      <div class="bni" onclick="go('sc-favs')"><div class="bni-ico">❤️</div>Favoris</div>
+      <div class="bni" onclick="go('sc-profile')"><div class="bni-ico">👤</div>Profil</div>
+    </div>
+  </div>
+
+  <!-- ═══ SEARCH ═══ -->
+  <div class="sc" id="sc-search">
+    <div class="hdr"><button class="bk" onclick="go('sc-home')">←</button><div class="hdr-title">Rechercher</div></div>
+    <div class="search-full">
+      <div class="sf-row">
+        <input class="sf-input" placeholder="Quartier, ville, type..." autofocus>
+      </div>
+    </div>
+    <div class="filters-panel">
+      <div class="fp-title">Type de bien</div>
+      <div class="fp-row">
+        <div class="fp-chip on" onclick="toggleChip(this)">Tous</div>
+        <div class="fp-chip" onclick="toggleChip(this)">Studio</div>
+        <div class="fp-chip" onclick="toggleChip(this)">F2/F3</div>
+        <div class="fp-chip" onclick="toggleChip(this)">Villa</div>
+        <div class="fp-chip" onclick="toggleChip(this)">Chambre</div>
+      </div>
+      <div class="fp-title" style="margin-top:10px">Ville</div>
+      <div class="fp-row">
+        <div class="fp-chip on" onclick="toggleChip(this)">Douala</div>
+        <div class="fp-chip" onclick="toggleChip(this)">Yaoundé</div>
+        <div class="fp-chip" onclick="toggleChip(this)">Bafoussam</div>
+        <div class="fp-chip" onclick="toggleChip(this)">Bamenda</div>
+      </div>
+      <div class="fp-title" style="margin-top:10px">Budget (FCFA/mois)</div>
+      <div class="range-row">
+        <input class="range-inp" placeholder="Min (ex: 20000)">
+        <input class="range-inp" placeholder="Max (ex: 100000)">
+      </div>
+      <div class="fp-title">Commodités</div>
+      <div class="fp-row">
+        <div class="fp-chip" onclick="toggleChip(this)">💧 Forage</div>
+        <div class="fp-chip" onclick="toggleChip(this)">⚡ Eneo</div>
+        <div class="fp-chip" onclick="toggleChip(this)">❄️ Clim</div>
+        <div class="fp-chip" onclick="toggleChip(this)">🅿️ Parking</div>
+        <div class="fp-chip" onclick="toggleChip(this)">🔒 Gardien</div>
+        <div class="fp-chip" onclick="toggleChip(this)">📡 WiFi</div>
+      </div>
+      <button class="btn-search-go" onclick="go('sc-home');showToast('🔍 Résultats filtrés !')">Rechercher</button>
+    </div>
+  </div>
+
+  <!-- ═══ DETAIL ═══ -->
+  <div class="sc" id="sc-detail" style="background:var(--white)">
+    <div class="d-img">🛋️
+      <button class="d-back" onclick="go('sc-home')">←</button>
+      <button class="d-share" onclick="showToast('🔗 Lien copié ! Partagez sur WhatsApp')">⬆️</button>
+      <button class="d-fav" onclick="showToast('❤️ Ajouté aux favoris !')">🤍</button>
+    </div>
+    <div class="d-thumbs">
+      <div class="d-th on">🛋️</div><div class="d-th">🛏</div><div class="d-th">🚿</div><div class="d-th">🍳</div>
+      <div class="d-cnt">1 / 8 photos</div>
+    </div>
+    <div class="d-body">
+      <div class="d-badges">
+        <span class="d-bdg d-bdg-blue">✅ Logement Vérifié</span>
+        <span class="d-bdg d-bdg-orange">⭐ À la Une</span>
+        <span class="d-bdg d-bdg-gray">🏠 Studio</span>
+      </div>
+      <div class="d-price">85 000 <span>FCFA / mois</span></div>
+      <div class="d-name">Studio moderne à Bonapriso</div>
+      <div class="d-loc">📍 Bonapriso, Douala &nbsp;·&nbsp; <span style="color:var(--blue);cursor:pointer" onclick="go('sc-map')">Voir sur la carte</span></div>
+      <div class="d-ams">
+        <div class="d-am"><div class="d-am-ico">🛏</div><div class="d-am-lbl">Chambre<br/>1</div></div>
+        <div class="d-am"><div class="d-am-ico">🚿</div><div class="d-am-lbl">Douche<br/>1</div></div>
+        <div class="d-am"><div class="d-am-ico">💧</div><div class="d-am-lbl">Forage<br/>Oui</div></div>
+        <div class="d-am"><div class="d-am-ico">⚡</div><div class="d-am-lbl">Eau ch.<br/>Oui</div></div>
+        <div class="d-am"><div class="d-am-ico">🅿️</div><div class="d-am-lbl">Parking<br/>Oui</div></div>
+      </div>
+      <div class="d-sec">📝 Description</div>
+      <div class="d-desc">Studio propre et moderne, dans une zone calme et sécurisée. Compteur Eneo prépayé individuel, forage permanent. À 5 min du marché. Pas de frais d'agence — contact direct propriétaire.</div>
+      <div class="d-sec">💰 Calculateur de budget</div>
+      <div class="budget-calc">
+        <div class="bc-title">🧮 Total à prévoir pour emménager</div>
+        <div class="bc-rows">
+          <div class="bc-row"><span class="bc-row-l">Loyer mensuel</span><span class="bc-row-v">85 000 FCFA</span></div>
+          <div class="bc-row"><span class="bc-row-l">Caution (2 mois)</span><span class="bc-row-v">170 000 FCFA</span></div>
+          <div class="bc-row"><span class="bc-row-l">Avance (1 mois)</span><span class="bc-row-v">85 000 FCFA</span></div>
+        </div>
+        <div class="bc-total"><span>Total à préparer</span><span class="bc-total-v">340 000 FCFA</span></div>
+      </div>
+      <div class="d-sec">🗝️ Détails</div>
+      <div class="d-rows">
+        <div class="d-row"><span class="d-row-l">Loyer</span><span class="d-row-v">85 000 FCFA</span></div>
+        <div class="d-row"><span class="d-row-l">Caution</span><span class="d-row-v">2 mois</span></div>
+        <div class="d-row"><span class="d-row-l">Avance</span><span class="d-row-v">1 mois</span></div>
+        <div class="d-row"><span class="d-row-l">Disponibilité</span><span class="d-row-v" style="color:var(--green)">Immédiate ✓</span></div>
+      </div>
+      <div class="d-sec">👤 Propriétaire</div>
+      <div class="host-card">
+        <div class="host-av">👨‍💼</div>
+        <div style="flex:1">
+          <div class="host-type">✅ Propriétaire Direct · Vérifié</div>
+          <div class="host-name">M. Moussa Njoya</div>
+          <div class="host-rating">⭐ 4.8 · 23 avis · Répond en &lt; 1h</div>
+        </div>
+        <div class="host-link">Voir profil</div>
+      </div>
+    </div>
+    <div class="d-cta">
+      <button class="btn-call" onclick="showToast('📞 Appel en cours...')">📞 Appeler</button>
+      <button class="btn-wa" onclick="showToast('💬 Ouverture WhatsApp...')">💬 WhatsApp</button>
+      <button class="btn-signal" onclick="showToast('🚨 Annonce signalée. Merci !')">🚨</button>
+    </div>
+  </div>
+
+  <!-- ═══ MAP ═══ -->
+  <div class="sc" id="sc-map">
+    <div class="hdr"><button class="bk" onclick="go('sc-home')">←</button><div class="hdr-title">Carte des logements</div></div>
+    <div class="map-area" style="flex:1;position:relative">
+      <div class="map-grid"></div>
+      <div class="map-road-h" style="top:35%"></div>
+      <div class="map-road-h" style="top:65%"></div>
+      <div class="map-road-v" style="left:30%"></div>
+      <div class="map-road-v" style="left:70%"></div>
+      <!-- Pins -->
+      <div class="map-pin" style="top:20%;left:20%" onclick="showToast('Studio · 45 000 FCFA/mois')">
+        <div class="map-pin-bubble">45K FCFA</div>
+        <div class="map-pin-tail"></div>
+      </div>
+      <div class="map-pin" style="top:30%;left:60%" onclick="go('sc-detail')">
+        <div class="map-pin-bubble orange">85K FCFA ⭐</div>
+        <div class="map-pin-tail orange"></div>
+      </div>
+      <div class="map-pin" style="top:55%;left:40%" onclick="showToast('Chambre · 28 000 FCFA/mois')">
+        <div class="map-pin-bubble">28K FCFA</div>
+        <div class="map-pin-tail"></div>
+      </div>
+      <div class="map-pin" style="top:60%;left:75%" onclick="showToast('F2 · 60 000 FCFA/mois')">
+        <div class="map-pin-bubble">60K FCFA</div>
+        <div class="map-pin-tail"></div>
+      </div>
+      <div class="map-pin" style="top:45%;left:15%" onclick="showToast('Studio · 35 000 FCFA/mois')">
+        <div class="map-pin-bubble">35K FCFA</div>
+        <div class="map-pin-tail"></div>
+      </div>
+      <!-- User dot -->
+      <div style="position:absolute;top:48%;left:48%"><div class="map-center-dot"></div></div>
+      <!-- Controls -->
+      <div class="map-controls" style="bottom:180px">
+        <button class="map-ctrl-btn">+</button>
+        <button class="map-ctrl-btn">−</button>
+        <button class="map-ctrl-btn">📍</button>
+      </div>
+      <!-- Preview card -->
+      <div class="map-card-preview">
+        <div class="map-card-img">🛋️</div>
+        <div class="map-card-info">
+          <div class="map-card-price">85 000 FCFA/mois</div>
+          <div class="map-card-name">Studio · Bonapriso, Douala</div>
+        </div>
+        <button class="map-card-btn" onclick="go('sc-detail')">Voir →</button>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni" onclick="go('sc-home')"><div class="bni-ico">🏠</div>Accueil</div>
+      <div class="bni on"><div class="bni-ico">🗺️</div>Carte</div>
+      <div class="bnplus" onclick="go('sc-publish')">+</div>
+      <div class="bni" onclick="go('sc-favs')"><div class="bni-ico">❤️</div>Favoris</div>
+      <div class="bni" onclick="go('sc-profile')"><div class="bni-ico">👤</div>Profil</div>
+    </div>
+  </div>
+
+  <!-- ═══ FAVORIS ═══ -->
+  <div class="sc" id="sc-favs">
+    <div class="hdr"><div class="hdr-title">❤️ Mes favoris</div></div>
+    <div class="scroll-content" style="padding:14px 18px 90px">
+      <div class="lc" onclick="go('sc-detail')" style="margin:0 0 10px">
+        <div class="lc-img" style="background:linear-gradient(135deg,#C8E6C9,#81C784)">🛋️<div class="lc-vbadge">✅</div></div>
+        <div class="lc-body">
+          <div class="lc-price">85 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Studio moderne Bonapriso</div>
+          <div class="lc-loc">📍 Bonapriso, Douala</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">💧 Forage</span></div><span>❤️</span></div>
+        </div>
+      </div>
+      <div class="lc" onclick="go('sc-detail')" style="margin:0 0 10px">
+        <div class="lc-img" style="background:linear-gradient(135deg,#D4E8FF,#90CAF9)">🏢</div>
+        <div class="lc-body">
+          <div class="lc-price">60 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Appartement F2 Makepe</div>
+          <div class="lc-loc">📍 Makepe, Douala</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">⚡ Eneo</span></div><span>❤️</span></div>
+        </div>
+      </div>
+      <div class="lc" onclick="go('sc-detail')" style="margin:0 0 10px">
+        <div class="lc-img" style="background:linear-gradient(135deg,#FFF9C4,#FFF176)">🏠</div>
+        <div class="lc-body">
+          <div class="lc-price">45 000 <span>FCFA/mois</span></div>
+          <div class="lc-name">Studio Bonamoussadi</div>
+          <div class="lc-loc">📍 Bonamoussadi, Douala</div>
+          <div class="lc-row"><div class="lc-tags"><span class="lc-tag">❄️ Clim</span></div><span>❤️</span></div>
+        </div>
+      </div>
+      <div style="background:var(--blue-l);border-radius:12px;padding:12px;font-size:0.78rem;color:var(--blue);font-weight:600;text-align:center">
+        💡 Comparez vos 3 favoris côte à côte
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni" onclick="go('sc-home')"><div class="bni-ico">🏠</div>Accueil</div>
+      <div class="bni" onclick="go('sc-map')"><div class="bni-ico">🗺️</div>Carte</div>
+      <div class="bnplus" onclick="go('sc-publish')">+</div>
+      <div class="bni on"><div class="bni-ico">❤️</div>Favoris</div>
+      <div class="bni" onclick="go('sc-profile')"><div class="bni-ico">👤</div>Profil</div>
+    </div>
+  </div>
+
+  <!-- ═══ PUBLISH ═══ -->
+  <div class="sc" id="sc-publish">
+    <div class="hdr"><button class="bk" onclick="go('sc-home')">←</button><div class="hdr-title">Publier une annonce</div></div>
+    <div class="pub-bar">
+      <div class="pb cur" id="pb0"></div><div class="pb" id="pb1"></div><div class="pb" id="pb2"></div>
+      <div class="pb" id="pb3"></div><div class="pb" id="pb4"></div>
+    </div>
+    <div class="pub-body" id="pub-body">
+      <!-- Step 1 -->
+      <div class="pub-step on" id="ps1">
+        <div class="pub-si">Étape 1 sur 5 · Type de bien</div>
+        <div class="pub-st">Quel logement proposez-vous ?</div>
+        <label class="fl">Type de transaction</label>
+        <div class="radio-row">
+          <div class="ro on" onclick="activeRadio(this)"><div class="rd"></div>À louer</div>
+          <div class="ro" onclick="activeRadio(this)"><div class="rd"></div>À vendre</div>
+        </div>
+        <label class="fl">Type de bien</label>
+        <select class="fsel"><option>Studio</option><option>Appartement F2</option><option>Appartement F3+</option><option>Villa</option><option>Chambre</option></select>
+        <label class="fl">Ville</label>
+        <select class="fsel"><option>Douala</option><option>Yaoundé</option><option>Bafoussam</option><option>Bamenda</option></select>
+        <label class="fl">Quartier</label>
+        <select class="fsel"><option>Makepe</option><option>Bonamoussadi</option><option>Akwa</option><option>Deido</option><option>Ndokotti</option><option>Bonapriso</option></select>
+        <button class="btn-primary" onclick="pubGo(1)">Suivant →</button>
+      </div>
+      <!-- Step 2 -->
+      <div class="pub-step" id="ps2">
+        <div class="pub-si">Étape 2 sur 5 · Prix & conditions</div>
+        <div class="pub-st">Définissez vos conditions</div>
+        <label class="fl">Prix du loyer (FCFA)</label>
+        <input class="fi" type="number" placeholder="Ex: 80 000" value="80000">
+        <label class="fl">Caution</label>
+        <select class="fsel"><option>2 mois</option><option>1 mois</option><option>3 mois</option><option>Aucune</option></select>
+        <label class="fl">Avance</label>
+        <select class="fsel"><option>1 mois</option><option>2 mois</option><option>Aucune</option></select>
+        <label class="fl">Charges supplémentaires</label>
+        <input class="fi" placeholder="À préciser (eau, électricité...)">
+        <label class="fl">Description</label>
+        <textarea style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:0.85rem;color:var(--text);outline:none;resize:none;height:80px;background:var(--white);margin-bottom:14px">Studio moderne, carrelé, avec balcon, forage, compteur Eneo prépayé, parking disponible.</textarea>
+        <button class="btn-primary" onclick="pubGo(2)">Suivant →</button>
+      </div>
+      <!-- Step 3 -->
+      <div class="pub-step" id="ps3">
+        <div class="pub-si">Étape 3 sur 5 · Commodités & Photos</div>
+        <div class="pub-st">Quelles sont les commodités ?</div>
+        <div class="comm-grid">
+          <div class="cb2 on" onclick="toggleComm(this)"><div class="cc">✓</div>💧 Forage</div>
+          <div class="cb2" onclick="toggleComm(this)"><div class="cc"></div>🌡️ Eau chaude</div>
+          <div class="cb2 on" onclick="toggleComm(this)"><div class="cc">✓</div>🅿️ Parking</div>
+          <div class="cb2 on" onclick="toggleComm(this)"><div class="cc">✓</div>⚡ Compteur prépayé</div>
+          <div class="cb2" onclick="toggleComm(this)"><div class="cc"></div>🗄️ Placards</div>
+          <div class="cb2 on" onclick="toggleComm(this)"><div class="cc">✓</div>🔒 Sécurité</div>
+          <div class="cb2" onclick="toggleComm(this)"><div class="cc"></div>❄️ Climatisation</div>
+          <div class="cb2" onclick="toggleComm(this)"><div class="cc"></div>📡 WiFi</div>
+        </div>
+        <label class="fl">Photos du bien</label>
+        <div class="pgrid">
+          <div class="pth">🛋️<div class="pdel">✕</div></div>
+          <div class="pth" style="background:linear-gradient(135deg,#D4E8FF,#90CAF9)">🛏<div class="pdel">✕</div></div>
+          <div class="pth" style="background:linear-gradient(135deg,#FFE8D4,#FFAB76)">🚿<div class="pdel">✕</div></div>
+          <div class="pth" style="background:linear-gradient(135deg,#D4F5FF,#80DEEA)">🍳<div class="pdel">✕</div></div>
+          <div class="pth" style="background:linear-gradient(135deg,#E8D4FF,#CE93D8)">🪴<div class="pdel">✕</div></div>
+          <div class="padd" onclick="showToast('📷 Galerie ouverte !')"><div class="padd-ico">📷</div><div class="padd-lbl">Ajouter</div></div>
+        </div>
+        <button class="btn-primary" onclick="pubGo(3)">Suivant →</button>
+      </div>
+      <!-- Step 4 -->
+      <div class="pub-step" id="ps4">
+        <div class="pub-si">Étape 4 sur 5 · Boost</div>
+        <div class="pub-st">Boostez votre annonce</div>
+        <div class="boost-box">
+          <div class="bb-title">⭐ Boostez votre annonce</div>
+          <div class="bb-desc">Apparaissez en tête de liste "À la Une". 3× plus de contacts garantis.</div>
+          <div class="bb-opts">
+            <div class="bb-o" onclick="activeBoost(this)"><div class="bb-o-price">2 000 F</div><div class="bb-o-lbl">7 jours</div></div>
+            <div class="bb-o on" onclick="activeBoost(this)"><div class="bb-o-price">3 000 F</div><div class="bb-o-lbl">15 jours ✓</div></div>
+            <div class="bb-o" onclick="activeBoost(this)"><div class="bb-o-price">5 000 F</div><div class="bb-o-lbl">30 jours</div></div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="pubGo(4)">Suivant →</button>
+        <div style="height:10px"></div>
+        <button class="btn-outline" onclick="pubGo(4)">Passer cette étape</button>
+      </div>
+      <!-- Step 5 -->
+      <div class="pub-step" id="ps5">
+        <div class="pub-si">Étape 5 sur 5 · Récapitulatif</div>
+        <div class="pub-st">Vérifiez avant publication</div>
+        <div class="recap-box">
+          <div class="rb-title">Détails de votre annonce</div>
+          <div class="rb-row"><span class="rb-l">Type</span><span class="rb-v">Studio · À louer</span></div>
+          <div class="rb-row"><span class="rb-l">Ville</span><span class="rb-v">Douala</span></div>
+          <div class="rb-row"><span class="rb-l">Quartier</span><span class="rb-v">Makepe</span></div>
+          <div class="rb-row"><span class="rb-l">Loyer</span><span class="rb-v">80 000 FCFA</span></div>
+          <div class="rb-row"><span class="rb-l">Caution</span><span class="rb-v">2 mois</span></div>
+          <div class="rb-row"><span class="rb-l">Avance</span><span class="rb-v">1 mois</span></div>
+          <div class="rb-row"><span class="rb-l">Commodités</span><span class="rb-v">5 sélectionnées</span></div>
+          <div class="rb-row"><span class="rb-l">Photos</span><span class="rb-v">5 photos</span></div>
+          <div class="rb-row"><span class="rb-l">Boost</span><span class="rb-v" style="color:var(--orange)">⭐ 15 jours (3 000 F)</span></div>
+        </div>
+        <div class="toggle-row">
+          <div><div style="font-size:0.85rem;font-weight:700;color:var(--text)">⭐ Booster l'annonce</div><div style="font-size:0.7rem;color:var(--muted);margin-top:2px">Mise en avant en haut de liste</div></div>
+          <div class="tw"><div class="tw-k"></div></div>
+        </div>
+        <button class="btn-primary" onclick="go('sc-home');showToast('✅ Annonce publiée avec succès !')">✅ Publier l'annonce</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ WALLET ═══ -->
+  <div class="sc" id="sc-wallet">
+    <div class="hdr"><div class="hdr-title">💰 Mon portefeuille</div></div>
+    <div class="scroll-content" style="padding-bottom:82px">
+      <div class="wallet-banner">
+        <div class="wb-deco"></div><div class="wb-deco2"></div>
+        <div class="wb-label">Solde CamerToit</div>
+        <div class="wb-amount">12 500 FCFA</div>
+        <div class="wb-sub">Utilisable pour booster vos annonces</div>
+        <div class="wb-actions">
+          <button class="wb-btn wb-btn-white" onclick="go('sc-recharge')">+ Recharger</button>
+          <button class="wb-btn wb-btn-outline" onclick="go('sc-stats')">📊 Statistiques</button>
+        </div>
+      </div>
+      <div class="wallet-menu" style="margin-top:14px">
+        <div class="wm-section">Mes actions</div>
+        <div class="wm-item"><div class="wm-l"><div class="wm-ico">⭐</div><div><div class="wm-lbl">Booster mes annonces</div><div class="wm-sub">Passer en À la une</div></div></div><div class="wm-r"><div class="wm-arr">›</div></div></div>
+        <div class="wm-item"><div class="wm-l"><div class="wm-ico">🏅</div><div><div class="wm-lbl">Abonnement Démarcheur</div><div class="wm-sub">Actif jusqu'au 12/06/2025</div></div></div><div class="wm-r"><div class="wm-val">Actif</div><div class="wm-arr">›</div></div></div>
+        <div class="wm-item" onclick="go('sc-stats')"><div class="wm-l"><div class="wm-ico">📊</div><div><div class="wm-lbl">Mes statistiques</div><div class="wm-sub">245 vues ce mois</div></div></div><div class="wm-r"><div class="wm-arr">›</div></div></div>
+        <div class="wm-section">Transactions récentes</div>
+        <div class="wm-item"><div class="wm-l"><div class="wm-ico" style="background:#FFF3E0">⭐</div><div><div class="wm-lbl">Boost — Studio Makepe</div><div class="wm-sub">Aujourd'hui · 14h22</div></div></div><div class="wm-r"><div class="wm-val" style="color:var(--red)">-3 000 F</div></div></div>
+        <div class="wm-item"><div class="wm-l"><div class="wm-ico">💰</div><div><div class="wm-lbl">Recharge MTN MoMo</div><div class="wm-sub">Hier · 09h15</div></div></div><div class="wm-r"><div class="wm-val" style="color:var(--green)">+10 000 F</div></div></div>
+        <div class="wm-item"><div class="wm-l"><div class="wm-ico" style="background:#FFF3E0">🏅</div><div><div class="wm-lbl">Badge Vérifié — F2</div><div class="wm-sub">10/06 · 16h00</div></div></div><div class="wm-r"><div class="wm-val" style="color:var(--red)">-2 500 F</div></div></div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni" onclick="go('sc-home')"><div class="bni-ico">🏠</div>Accueil</div>
+      <div class="bni" onclick="go('sc-map')"><div class="bni-ico">🗺️</div>Carte</div>
+      <div class="bnplus" onclick="go('sc-publish')">+</div>
+      <div class="bni" onclick="go('sc-favs')"><div class="bni-ico">❤️</div>Favoris</div>
+      <div class="bni on" onclick="go('sc-profile')"><div class="bni-ico">👤</div>Profil</div>
+    </div>
+  </div>
+
+  <!-- ═══ RECHARGE ═══ -->
+  <div class="sc" id="sc-recharge">
+    <div class="hdr"><button class="bk" onclick="go('sc-wallet')">←</button><div class="hdr-title">Recharger le portefeuille</div></div>
+    <div class="rc-body">
+      <div class="rc-st">Choisissez un montant</div>
+      <div class="rc-amounts">
+        <div class="rc-a"><span class="rc-a-val">2 000</span><span class="rc-a-sub">FCFA</span></div>
+        <div class="rc-a"><span class="rc-a-val">5 000</span><span class="rc-a-sub">FCFA</span></div>
+        <div class="rc-a on"><span class="rc-a-val">10 000</span><span class="rc-a-sub">FCFA</span></div>
+        <div class="rc-a"><span class="rc-a-val">20 000</span><span class="rc-a-sub">FCFA</span></div>
+      </div>
+      <label class="fl">Montant personnalisé</label>
+      <input class="fi" value="10 000 FCFA">
+      <div class="rc-st" style="margin-bottom:10px">Méthode de paiement</div>
+      <div class="po on" onclick="activePayOpt(this)">
+        <div class="po-ico mtn">MTN</div>
+        <div class="po-lbl">MTN Mobile Money</div>
+        <div class="po-radio"></div>
+      </div>
+      <div class="po" onclick="activePayOpt(this)">
+        <div class="po-ico om">OM</div>
+        <div class="po-lbl">Orange Money</div>
+        <div class="po-radio"></div>
+      </div>
+      <label class="fl" style="margin-top:6px">Numéro de téléphone</label>
+      <input class="fi" placeholder="+237 6XX XXX XXX">
+      <button class="btn-primary" style="margin-top:6px" onclick="go('sc-wallet');showToast('✅ Rechargement de 10 000 FCFA confirmé !')">Payer 10 000 FCFA</button>
+    </div>
+  </div>
+
+  <!-- ═══ STATS ═══ -->
+  <div class="sc" id="sc-stats">
+    <div class="hdr"><button class="bk" onclick="go('sc-wallet')">←</button><div class="hdr-title">📊 Mes statistiques</div></div>
+    <div class="stats-body">
+      <div class="stats-period">
+        <select class="stats-sel"><option>Ce mois</option><option>Cette semaine</option><option>Ce trimestre</option></select>
+      </div>
+      <div class="sn-grid">
+        <div class="sn"><div class="sn-val" style="color:var(--blue)">245</div><div class="sn-lbl">Vues</div></div>
+        <div class="sn"><div class="sn-val" style="color:var(--orange)">32</div><div class="sn-lbl">Contacts</div></div>
+        <div class="sn"><div class="sn-val" style="color:var(--green)">18</div><div class="sn-lbl">Messages</div></div>
+      </div>
+      <div class="s2grid">
+        <div class="sm"><div class="sm-t">Note clients</div><div class="sm-v">4.8 / 5</div><div class="sm-s" style="color:var(--orange)">⭐ 53 avis</div></div>
+        <div class="sm"><div class="sm-t">Taux de contact</div><div class="sm-v">13.1%</div><div class="sm-s" style="color:var(--green)">↑ +2% ce mois</div></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-box-t">Vues de mes annonces</div>
+        <div class="chart-wrap">
+          <div class="cbar" style="height:30%"></div>
+          <div class="cbar" style="height:45%"></div>
+          <div class="cbar" style="height:38%"></div>
+          <div class="cbar hi" style="height:62%"></div>
+          <div class="cbar hi" style="height:78%"></div>
+          <div class="cbar" style="height:55%"></div>
+          <div class="cbar hi" style="height:100%"></div>
+          <div class="cbar" style="height:70%"></div>
+          <div class="cbar hi" style="height:85%"></div>
+          <div class="cbar" style="height:60%"></div>
+        </div>
+        <div class="chart-xl">
+          <div class="cx">01/05</div><div class="cx"></div><div class="cx">10/05</div><div class="cx"></div>
+          <div class="cx">20/05</div><div class="cx"></div><div class="cx"></div><div class="cx"></div>
+          <div class="cx">31/05</div><div class="cx"></div>
+        </div>
+      </div>
+      <div class="top-annonces">
+        <div class="ta-title">Top annonces</div>
+        <div class="ta-item"><div class="ta-rank">1</div><div class="ta-name">Studio Bonifosse · Bonapriso</div><div class="ta-views">98 vues</div></div>
+        <div class="ta-item"><div class="ta-rank">2</div><div class="ta-name">F2 neuf · Makepe</div><div class="ta-views">82 vues</div></div>
+        <div class="ta-item"><div class="ta-rank">3</div><div class="ta-name">Chambre meublée · Ndokotti</div><div class="ta-views">65 vues</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROFILE ═══ -->
+  <div class="sc" id="sc-profile">
+    <div class="hdr">
+      <div class="hdr-title">Mon profil</div>
+      <div style="margin-left:auto;font-size:0.78rem;color:var(--blue);font-weight:700;cursor:pointer" onclick="toggleDark()">🌙 Mode sombre</div>
+    </div>
+    <div class="profile-body">
+      <!-- Lang -->
+      <div class="lang-row">
+        <div class="lang-btn on" onclick="setLang(this,'fr')">🇫🇷 Français</div>
+        <div class="lang-btn" onclick="setLang(this,'en')">🇬🇧 English</div>
+      </div>
+      <div class="prof-top">
+        <div class="prof-av">👤</div>
+        <div>
+          <div class="prof-name">Alain T. <span style="color:var(--blue);font-size:0.72rem">✅ Vérifié</span></div>
+          <div class="prof-phone">+237 6 12 34 56 78</div>
+          <div class="prof-badge">🏅 Démarcheur professionnel</div>
+        </div>
+      </div>
+      <div class="prof-stats">
+        <div class="ps-card"><div class="ps-val">8</div><div class="ps-lbl">Annonces</div></div>
+        <div class="ps-card"><div class="ps-val">245</div><div class="ps-lbl">Vues</div></div>
+        <div class="ps-card"><div class="ps-val">4.8⭐</div><div class="ps-lbl">Note</div></div>
+      </div>
+      <div class="prof-menu">
+        <div class="pm-item"><div class="pm-l"><span class="pm-ico">👤</span>Informations personnelles</div><div class="pm-r"><span class="pm-arr">›</span></div></div>
+        <div class="pm-item"><div class="pm-l"><span class="pm-ico">🏠</span>Mes annonces</div><div class="pm-r"><span class="pm-arr">›</span></div></div>
+        <div class="pm-item" onclick="go('sc-wallet')"><div class="pm-l"><span class="pm-ico">💰</span>Mon portefeuille</div><div class="pm-r"><span class="pm-val">12 500 F</span><span class="pm-arr">›</span></div></div>
+        <div class="pm-item" onclick="go('sc-stats')"><div class="pm-l"><span class="pm-ico">📊</span>Mes statistiques</div><div class="pm-r"><span class="pm-arr">›</span></div></div>
+        <div class="pm-item"><div class="pm-l"><span class="pm-ico">🏅</span>Abonnement</div><div class="pm-r"><span class="pm-val">Actif</span><span class="pm-arr">›</span></div></div>
+        <div class="pm-item"><div class="pm-l"><span class="pm-ico">⭐</span>Avis clients</div><div class="pm-r"><span class="pm-val">4.8/5 (53)</span><span class="pm-arr">›</span></div></div>
+        <div class="pm-item"><div class="pm-l"><span class="pm-ico">🔔</span>Notifications</div><div class="pm-r"><span class="pm-arr">›</span></div></div>
+        <div class="pm-item"><div class="pm-l"><span class="pm-ico">🛡️</span>Signalements</div><div class="pm-r"><span class="pm-arr">›</span></div></div>
+        <div class="pm-item"><div class="pm-l"><span class="pm-ico">⚙️</span>Paramètres</div><div class="pm-r"><span class="pm-arr">›</span></div></div>
+        <div class="pm-item pm-danger" onclick="go('sc-welcome')"><div class="pm-l"><span class="pm-ico">🚪</span>Se déconnecter</div><div class="pm-r"><span class="pm-arr">›</span></div></div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni" onclick="go('sc-home')"><div class="bni-ico">🏠</div>Accueil</div>
+      <div class="bni" onclick="go('sc-map')"><div class="bni-ico">🗺️</div>Carte</div>
+      <div class="bnplus" onclick="go('sc-publish')">+</div>
+      <div class="bni" onclick="go('sc-favs')"><div class="bni-ico">❤️</div>Favoris</div>
+      <div class="bni on"><div class="bni-ico">👤</div>Profil</div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+// Navigation
+function go(id){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
+  const sc=document.getElementById(id);
+  if(sc){sc.classList.add('on');sc.scrollTop=0}
+}
+// Toast
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+// Role selection
+function chooseRole(r){
+  document.getElementById('r-loc').classList.toggle('on',r==='loc');
+  document.getElementById('r-bail').classList.toggle('on',r==='bail');
+}
+// Chips
+function activeChip(el){
+  el.closest('.city-row,.filter-bar,.city-scroll')?.querySelectorAll('.c-chip,.f-chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+function toggleChip(el){el.classList.toggle('on')}
+// Publication steps
+let curStep=1;
+function pubGo(from){
+  document.getElementById('ps'+(from)).style.display='none';
+  const next=from+1;
+  if(next<=5){
+    document.getElementById('ps'+next).style.display='block';
+    curStep=next;
+    for(let i=0;i<5;i++){
+      const pb=document.getElementById('pb'+i);
+      if(i<next-1)pb.className='pb done';
+      else if(i===next-1)pb.className='pb cur';
+      else pb.className='pb';
+    }
+    document.getElementById('pub-body').scrollTop=0;
+  }
+}
+// Commodity toggle
+document.querySelectorAll('.cb2').forEach(b=>{
+  b.addEventListener('click',()=>{
+    b.classList.toggle('on');
+    b.querySelector('.cc').textContent=b.classList.contains('on')?'✓':'';
+  });
+});
+// Radio toggle
+function activeRadio(el){
+  el.closest('.radio-row').querySelectorAll('.ro').forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+}
+// Boost options
+function activeBoost(el){
+  document.querySelectorAll('.bb-o').forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+}
+// Recharge amounts
+document.querySelectorAll('.rc-a').forEach(a=>{
+  a.addEventListener('click',function(){
+    document.querySelectorAll('.rc-a').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+// Pay option
+function activePayOpt(el){
+  document.querySelectorAll('.po').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+}
+// Filter chips
+document.querySelectorAll('.fp-chip').forEach(c=>{
+  c.addEventListener('click',()=>c.classList.toggle('on'));
+});
+// Toggle dark mode
+let dark=false;
+function toggleDark(){
+  dark=!dark;
+  document.getElementById('phone').classList.toggle('dark',dark);
+  showToast(dark?'🌙 Mode sombre activé':'☀️ Mode clair activé');
+}
+// Language switch
+function setLang(el,lang){
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  showToast(lang==='en'?'🇬🇧 Language set to English':'🇫🇷 Langue française activée');
+}
+// Clock
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent=h+':'+m;
+}
+updateClock();setInterval(updateClock,10000);
+</script>
+</body>
+</html>
